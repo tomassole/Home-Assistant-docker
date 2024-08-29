@@ -1,0 +1,54 @@
+version: '3'
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    volumes:
+      - /docker/ha/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    #depends_on:
+    #  - mosquitto
+
+  node-red:
+    image: nodered/node-red:latest
+    environment:
+      - TZ=Europe/Madrid
+    ports:
+      - "1880:1880"
+    volumes:
+      - /docker/nodered:/data
+    network_mode: host
+
+  esphome:
+    container_name: esphome
+    image: esphome/esphome
+    environment:
+      - TZ=Europe/Madrid
+    volumes:
+      - /docker/esphome:/config
+      - /etc/localtime:/etc/localtime:ro
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    ports:
+      - "6052:6052"
+      - "6123:6123"
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    
+  mosquitto:
+    image: eclipse-mosquitto:1.6
+    container_name: "mosquitto"
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - "/docker/mosquitto/config:/mosquitto/config"
+      - "/docker/mosquitto/data:/mosquitto/data"
+      - "/docker/mosquitto/logs:/mosquitto/logs"
+    ports:
+      - "1883:1883"
+      - "9001:9001"  
+ #     - "8883:8883"
